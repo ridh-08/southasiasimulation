@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { CountryStats } from '../types/GameTypes';
-
 import { SOUTH_ASIAN_COUNTRIES } from '../data/CountryList';
+import { getRegionalAverage, AllIndicators } from '../data/ExcelDataLoader';
 
 interface FinalReportProps {
   finalStats: CountryStats;
   initialStats: CountryStats;
   selectedCountry: string;
   finalScore: number;
+  allIndicators: AllIndicators;
   onRestart: () => void;
 }
 
@@ -17,6 +18,7 @@ export const FinalReport: React.FC<FinalReportProps> = ({
   initialStats,
   selectedCountry,
   finalScore,
+  allIndicators,
   onRestart
 }) => {
   const comparisonChartRef = useRef<SVGSVGElement>(null);
@@ -44,11 +46,23 @@ export const FinalReport: React.FC<FinalReportProps> = ({
     // Sample regional averages (in real app, would come from CSV data)
     const regionalData = [
       { country: selectedCountry, gdp_growth: finalStats.gdp_growth, isPlayer: true },
-      { country: 'Regional Avg', gdp_growth: CSVDataLoader.getRegionalAverage('gdp_growth'), isPlayer: false },
-      { country: 'India', gdp_growth: 5.8, isPlayer: false },
-      { country: 'Bangladesh', gdp_growth: 6.1, isPlayer: false },
-      { country: 'Pakistan', gdp_growth: 1.2, isPlayer: false }
+      { country: 'Regional Avg', gdp_growth: getRegionalAverage(allIndicators, 'GDP', finalStats.year), isPlayer: false }
     ].filter(d => d.country !== selectedCountry || d.isPlayer);
+    
+    // Add other major countries for comparison
+    const majorCountries = ['India', 'Bangladesh', 'Pakistan'].filter(c => c !== selectedCountry);
+    majorCountries.forEach(country => {
+      const countryData = SOUTH_ASIAN_COUNTRIES.find(c => c.name === country);
+      if (countryData) {
+        // Use sample data for comparison (in real app, would use actual final year data)
+        const sampleGDP = country === 'India' ? 5.8 : country === 'Bangladesh' ? 6.1 : 1.2;
+        regionalData.push({
+          country,
+          gdp_growth: sampleGDP,
+          isPlayer: false
+        });
+      }
+    });
 
     const xScale = d3.scaleBand()
       .domain(regionalData.map(d => d.country))

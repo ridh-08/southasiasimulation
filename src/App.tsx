@@ -443,6 +443,7 @@ function App() {
         initialStats={buildInitialStats(gameState.playerCountry, startYear)}
         selectedCountry={gameState.playerCountry}
         finalScore={finalScore}
+        allIndicators={allIndicators}
         onRestart={handleRestart}
       />
     );

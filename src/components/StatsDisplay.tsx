@@ -192,13 +192,15 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
   }, [currentStats, selectedCountry]);
 
   // If stats are missing or all zero, show loading spinner
-  const isLoading = !currentStats || Object.values(currentStats).every(v => v === 0 || v === null || v === undefined || v === '' || Number.isNaN(v));
+  const isLoading = !currentStats || !currentStats.country || 
+    (currentStats.gdp_growth === 0 && currentStats.unemployment === 0 && currentStats.literacy_rate === 0);
+    
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="text-lg text-gray-600">Loading statistics...</div>
+          <div className="text-lg text-gray-600">Loading statistics for {selectedCountry}...</div>
         </div>
       </div>
     );

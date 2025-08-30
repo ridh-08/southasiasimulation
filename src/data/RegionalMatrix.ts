@@ -1,6 +1,6 @@
 import { TradeRelationship, RegionalMatrix, PolicySpillover } from '../types/GameTypes';
 import { SOUTH_ASIAN_COUNTRIES } from './CountryList';
-// Use ExcelDataLoader for initial stats where needed
+import { BILATERAL_TRADE_PRODUCTS, getMainTradeProducts, getTradeIntensity } from './TradeProductsLoader';
 
 // Trade relationships based on real South Asian trade patterns
 export const INITIAL_TRADE_MATRIX: TradeRelationship[] = [
@@ -170,7 +170,7 @@ export class RegionalEconomySimulator {
     sourceCountry: string,
     policyChanges: { [key: string]: number },
     tradeMatrix: TradeRelationship[],
-    realTradeData: any
+    tradeProductsData: any
   ): any[] {
     const detailedSpillovers: any[] = [];
     
@@ -183,88 +183,262 @@ export class RegionalEconomySimulator {
       const targetCountry = trade.from === sourceCountry ? trade.to : trade.from;
       const tradeVolume = trade.tradeVolume;
       
-      // Calculate specific product-based spillovers
-      if (realTradeData && realTradeData[sourceCountry] && realTradeData[sourceCountry][targetCountry]) {
-        const bilateralTrade = realTradeData[sourceCountry][targetCountry];
-        
-        bilateralTrade.mainProducts.forEach((product: string) => {
+      // Calculate specific product-based spillovers using bilateral trade products
+      const tradeProducts = getMainTradeProducts(sourceCountry, targetCountry);
+      
+      if (tradeProducts.total.length > 0) {
+        tradeProducts.total.forEach((product: string) => {
           if (this.isPolicyRelevantToProduct(policyChanges, product)) {
-            detailedSpillovers.push({
-              id: `${sourceCountry}-${targetCountry}-${product}`,
-              sourceCountry,
-              targetCountry,
-              policyCategory: this.getPolicyCategory(policyChanges, product),
-              effectType: 'trade',
-              magnitude: this.calculateProductSpillover(policyChanges, product, tradeVolume),
-              description: `${product} trade impact from ${sourceCountry} to ${targetCountry}`,
-              tradeProducts: [product],
-              timeframe: this.getSpilloverTimeframe(product),
-              confidence: 0.8
-            });
+            const magnitude = this.calculateProductSpillover(policyChanges, product, tradeVolume);
+            
+            if (Math.abs(magnitude) > 0.01) { // Only include significant spillovers
+              detailedSpillovers.push({
+                id: `${sourceCountry}-${targetCountry}-${product}`,
+                sourceCountry,
+                targetCountry,
+                policyCategory: this.getPolicyCategory(policyChanges, product),
+                effectType: this.getEffectType(product),
+                magnitude: magnitude,
+                description: `${product} trade impact from ${sourceCountry} to ${targetCountry}`,
+                tradeProducts: [product],
+                timeframe: this.getSpilloverTimeframe(product),
+                confidence: 0.8,
+                sector: this.getProductSector(product)
+              });
+            }
           }
         });
       }
+      
+      // Add general policy spillovers
+      Object.entries(policyChanges).forEach(([policyType, change]) => {
+        if (Math.abs(change) > 0.1) {
+          const magnitude = this.calculateGeneralSpillover(policyType, change, tradeVolume);
+          
+          if (Math.abs(magnitude) > 0.01) {
+            detailedSpillovers.push({
+              id: `${sourceCountry}-${targetCountry}-${policyType}`,
+              sourceCountry,
+              targetCountry,
+              policyCategory: policyType,
+              effectType: this.getPolicyEffectType(policyType),
+              magnitude: magnitude,
+              description: `${policyType} policy impact from ${sourceCountry} to ${targetCountry}`,
+              timeframe: this.getPolicyTimeframe(policyType),
+              confidence: 0.7
+            });
+          }
+        }
+      });
     });
 
     return detailedSpillovers;
   }
 
-  static isPolicyRelevantToProduct(policyChanges: { [key: string]: number }, product: string): boolean {
-    const productPolicyMap: { [key: string]: string[] } = {
-      'textiles': ['manufacturing', 'trade', 'labor_market'],
-      'pharmaceuticals': ['health', 'manufacturing', 'technology'],
-      'machinery': ['manufacturing', 'technology', 'infrastructure'],
-      'food': ['agriculture', 'trade'],
-      'petroleum': ['energy', 'trade'],
-      'electricity': ['energy', 'infrastructure']
-    };
+  static getEffectType(product: string): 'trade' | 'investment' | 'technology' | 'environment' {
+    const techProducts = ['machinery', 'pharmaceuticals', 'chemicals', 'electronics'];
+    const envProducts = ['petroleum', 'coal', 'natural gas', 'timber'];
     
-    const relevantPolicies = productPolicyMap[product] || [];
-    return relevantPolicies.some(policy => policy in policyChanges);
+    if (techProducts.some(tp => product.toLowerCase().includes(tp))) return 'technology';
+    if (envProducts.some(ep => product.toLowerCase().includes(ep))) return 'environment';
+    return 'trade';
   }
 
-  static getPolicyCategory(policyChanges: { [key: string]: number }, product: string): string {
-    const productPolicyMap: { [key: string]: string } = {
+  static getProductSector(product: string): string {
+    const productSectorMap: { [key: string]: string } = {
       'textiles': 'manufacturing',
       'pharmaceuticals': 'health',
       'machinery': 'manufacturing',
       'food': 'agriculture',
       'petroleum': 'energy',
-      'electricity': 'energy'
+      'electricity': 'energy',
+      'tea': 'agriculture',
+      'rice': 'agriculture',
+      'cotton': 'agriculture',
+      'cement': 'manufacturing',
+      'chemicals': 'manufacturing',
+      'fish': 'agriculture',
+      'timber': 'environment',
+      'gems': 'mining',
+      'handicrafts': 'services'
     };
     
-    return productPolicyMap[product] || 'trade';
+    const lowerProduct = product.toLowerCase();
+    for (const [key, sector] of Object.entries(productSectorMap)) {
+      if (lowerProduct.includes(key)) {
+        return sector;
+      }
+    }
+    return 'trade';
+  }
+
+  static calculateGeneralSpillover(policyType: string, change: number, tradeVolume: number): number {
+    const baseEffect = (tradeVolume / 100) * (change / 10);
+    
+    switch (policyType) {
+      case 'infrastructure':
+        return baseEffect * 0.15; // Infrastructure has strong spillovers
+      case 'education':
+        return baseEffect * 0.08; // Education has medium spillovers
+      case 'health':
+        return baseEffect * 0.06; // Health has moderate spillovers
+      case 'trade':
+        return baseEffect * 0.20; // Trade policy has high spillovers
+      case 'environment':
+        return baseEffect * 0.12; // Environmental policies have cross-border effects
+      default:
+        return baseEffect * 0.05;
+    }
+  }
+
+  static getPolicyEffectType(policyType: string): 'trade' | 'investment' | 'technology' | 'environment' {
+    switch (policyType) {
+      case 'trade':
+      case 'tariff':
+        return 'trade';
+      case 'infrastructure':
+      case 'foreign_investment':
+        return 'investment';
+      case 'technology':
+        return 'technology';
+      case 'environment':
+        return 'environment';
+      default:
+        return 'trade';
+    }
+  }
+
+  static getPolicyTimeframe(policyType: string): 'immediate' | 'short-term' | 'medium-term' | 'long-term' {
+    switch (policyType) {
+      case 'tariff':
+      case 'trade':
+        return 'immediate';
+      case 'infrastructure':
+      case 'health':
+        return 'medium-term';
+      case 'education':
+      case 'technology':
+        return 'long-term';
+      default:
+        return 'short-term';
+    }
+  }
+
+  static isPolicyRelevantToProduct(policyChanges: { [key: string]: number }, product: string): boolean {
+    const productPolicyMap: { [key: string]: string[] } = {
+      'textiles': ['manufacturing', 'trade', 'labor_market', 'services'],
+      'pharmaceuticals': ['health', 'manufacturing', 'technology'],
+      'machinery': ['manufacturing', 'technology', 'infrastructure', 'industry'],
+      'food': ['agriculture', 'trade'],
+      'rice': ['agriculture', 'trade'],
+      'tea': ['agriculture', 'trade'],
+      'cotton': ['agriculture', 'manufacturing'],
+      'petroleum': ['energy', 'trade'],
+      'electricity': ['energy', 'infrastructure'],
+      'cement': ['manufacturing', 'infrastructure'],
+      'chemicals': ['manufacturing', 'health'],
+      'fish': ['agriculture', 'trade'],
+      'timber': ['environment', 'trade'],
+      'gems': ['trade', 'services'],
+      'handicrafts': ['services', 'tourism'],
+      'jute': ['agriculture', 'manufacturing'],
+      'leather': ['manufacturing', 'trade'],
+      'spices': ['agriculture', 'trade'],
+      'rubber': ['agriculture', 'manufacturing'],
+      'coconut': ['agriculture', 'trade']
+    };
+    
+    const lowerProduct = product.toLowerCase();
+    let relevantPolicies: string[] = [];
+    
+    for (const [key, policies] of Object.entries(productPolicyMap)) {
+      if (lowerProduct.includes(key)) {
+        relevantPolicies = [...relevantPolicies, ...policies];
+      }
+    }
+    
+    return relevantPolicies.some(policy => policy in policyChanges);
+  }
+
+  static getPolicyCategory(policyChanges: { [key: string]: number }, product: string): string {
+    const lowerProduct = product.toLowerCase();
+    const productPolicyMap: { [key: string]: string } = {
+      'textiles': 'manufacturing',
+      'pharmaceuticals': 'health',
+      'machinery': 'manufacturing',
+      'food': 'agriculture',
+      'rice': 'agriculture',
+      'tea': 'agriculture',
+      'cotton': 'agriculture',
+      'petroleum': 'energy',
+      'electricity': 'energy',
+      'cement': 'manufacturing',
+      'chemicals': 'manufacturing',
+      'fish': 'agriculture',
+      'timber': 'environment',
+      'gems': 'services',
+      'handicrafts': 'services',
+      'jute': 'agriculture',
+      'leather': 'manufacturing',
+      'spices': 'agriculture',
+      'rubber': 'agriculture',
+      'coconut': 'agriculture'
+    };
+    
+    for (const [key, category] of Object.entries(productPolicyMap)) {
+      if (lowerProduct.includes(key)) {
+        return category;
+      }
+    }
+    
+    return 'trade';
   }
 
   static calculateProductSpillover(policyChanges: { [key: string]: number }, product: string, tradeVolume: number): number {
     // Product-specific spillover calculations
     const baseEffect = tradeVolume / 100;
+    const lowerProduct = product.toLowerCase();
     
-    switch (product) {
-      case 'textiles':
-        return (policyChanges.manufacturing || 0) * baseEffect * 0.3;
-      case 'pharmaceuticals':
-        return (policyChanges.health || 0) * baseEffect * 0.4;
-      case 'machinery':
-        return (policyChanges.infrastructure || 0) * baseEffect * 0.35;
-      case 'food':
-        return (policyChanges.agriculture || 0) * baseEffect * 0.25;
-      case 'petroleum':
-      case 'electricity':
-        return (policyChanges.energy || 0) * baseEffect * 0.5;
-      default:
-        return (policyChanges.trade || 0) * baseEffect * 0.2;
+    // Check for product categories and calculate spillovers
+    if (lowerProduct.includes('textile') || lowerProduct.includes('cotton') || lowerProduct.includes('garment')) {
+      return ((policyChanges.manufacturing || 0) + (policyChanges.services || 0)) * baseEffect * 0.3;
     }
+    if (lowerProduct.includes('pharmaceutical') || lowerProduct.includes('chemical')) {
+      return ((policyChanges.health || 0) + (policyChanges.manufacturing || 0)) * baseEffect * 0.4;
+    }
+    if (lowerProduct.includes('machinery') || lowerProduct.includes('equipment')) {
+      return ((policyChanges.infrastructure || 0) + (policyChanges.technology || 0)) * baseEffect * 0.35;
+    }
+    if (lowerProduct.includes('food') || lowerProduct.includes('rice') || lowerProduct.includes('tea') || 
+        lowerProduct.includes('fish') || lowerProduct.includes('spice')) {
+      return (policyChanges.agriculture || 0) * baseEffect * 0.25;
+    }
+    if (lowerProduct.includes('petroleum') || lowerProduct.includes('electricity') || 
+        lowerProduct.includes('gas') || lowerProduct.includes('energy')) {
+      return (policyChanges.energy || 0) * baseEffect * 0.5;
+    }
+    if (lowerProduct.includes('handicraft') || lowerProduct.includes('tourism') || lowerProduct.includes('gem')) {
+      return ((policyChanges.tourism || 0) + (policyChanges.services || 0)) * baseEffect * 0.3;
+    }
+    if (lowerProduct.includes('cement') || lowerProduct.includes('construction')) {
+      return (policyChanges.infrastructure || 0) * baseEffect * 0.4;
+    }
+    
+    // Default trade spillover
+    return (policyChanges.trade || 0) * baseEffect * 0.2;
   }
 
   static getSpilloverTimeframe(product: string): 'immediate' | 'short-term' | 'medium-term' | 'long-term' {
-    const immediateProducts = ['petroleum', 'electricity', 'food'];
-    const shortTermProducts = ['textiles', 'machinery'];
-    const mediumTermProducts = ['pharmaceuticals', 'chemicals'];
+    const lowerProduct = product.toLowerCase();
+    const immediateProducts = ['petroleum', 'electricity', 'food', 'gas', 'energy'];
+    const shortTermProducts = ['textiles', 'machinery', 'cement', 'rice', 'fish'];
+    const mediumTermProducts = ['pharmaceuticals', 'chemicals', 'equipment'];
+    const longTermProducts = ['technology', 'education', 'infrastructure'];
     
-    if (immediateProducts.includes(product)) return 'immediate';
-    if (shortTermProducts.includes(product)) return 'short-term';
-    if (mediumTermProducts.includes(product)) return 'medium-term';
+    if (immediateProducts.some(p => lowerProduct.includes(p))) return 'immediate';
+    if (shortTermProducts.some(p => lowerProduct.includes(p))) return 'short-term';
+    if (mediumTermProducts.some(p => lowerProduct.includes(p))) return 'medium-term';
+    if (longTermProducts.some(p => lowerProduct.includes(p))) return 'long-term';
     return 'long-term';
   }
 
