@@ -7,9 +7,15 @@ import { DetailedSpilloverDashboard } from './components/DetailedSpilloverDashbo
 import { GameLoop } from './components/GameLoop';
 import { FinalReport } from './components/FinalReport';
 import { CountryStats, PolicyDecision, RegionalEvent, MultiCountryGameState } from './types/GameTypes';
-// import { REAL_TRADE_RELATIONSHIPS } from './data/RealDataSources';
 import { SOUTH_ASIAN_COUNTRIES } from './data/CountryList';
-import { loadAllExcelIndicators, getIndicatorValue, AllIndicators } from './data/ExcelDataLoader';
+import { 
+  loadAllExcelIndicators, 
+  getIndicatorValue, 
+  getLatestIndicatorValue,
+  getCountryStats,
+  AllIndicators 
+} from './data/ExcelDataLoader';
+import { BILATERAL_TRADE_PRODUCTS } from './data/TradeProductsLoader';
 import { INITIAL_REGIONAL_MATRIX, RegionalEconomySimulator } from './data/RegionalMatrix';
 import { createDefaultPolicyDecisions } from './data/PolicyDecisions';
 import { PolicySimulator } from './utils/PolicyModels';
@@ -97,21 +103,42 @@ function App() {
   }
 
   const buildInitialStats = (country: string, year: number): CountryStats => {
-    // Always use Excel data, never fallback to zero
+    // Use Excel data with proper mapping and fallbacks
+    const gdpValue = getIndicatorValue(allIndicators, 'GDP', country, year) || 
+                     getLatestIndicatorValue(allIndicators, 'GDP', country).value || 3.5;
+    const unemploymentValue = getIndicatorValue(allIndicators, 'Unemployment', country, year) || 
+                              getLatestIndicatorValue(allIndicators, 'Unemployment', country).value || 5.0;
+    const literacyValue = getIndicatorValue(allIndicators, 'Literacy', country, year) || 
+                          getLatestIndicatorValue(allIndicators, 'Literacy', country).value || 70.0;
+    const healthValue = getIndicatorValue(allIndicators, 'Health', country, year) || 
+                        getLatestIndicatorValue(allIndicators, 'Health', country).value || 65.0;
+    const povertyValue = getIndicatorValue(allIndicators, 'Poverty', country, year) || 
+                         getLatestIndicatorValue(allIndicators, 'Poverty', country).value || 20.0;
+    const co2Value = getIndicatorValue(allIndicators, 'CO2_Emissions', country, year) || 
+                     getLatestIndicatorValue(allIndicators, 'CO2_Emissions', country).value || 2.0;
+    const populationValue = getIndicatorValue(allIndicators, 'Population', country, year) || 
+                            getLatestIndicatorValue(allIndicators, 'Population', country).value || 50000000;
+    const mortalityValue = getIndicatorValue(allIndicators, 'MortalityRate', country, year) || 
+                           getLatestIndicatorValue(allIndicators, 'MortalityRate', country).value || 30.0;
+    const educationValue = getIndicatorValue(allIndicators, 'Education', country, year) || 
+                           getLatestIndicatorValue(allIndicators, 'Education', country).value || 4.0;
+    const infrastructureValue = getIndicatorValue(allIndicators, 'Infrastructure', country, year) || 
+                                getLatestIndicatorValue(allIndicators, 'Infrastructure', country).value || 5.0;
+
     return {
       country,
       year,
-      gdp_growth: getIndicatorValue(allIndicators, 'GDP', country, year) ?? 0,
-      unemployment: getIndicatorValue(allIndicators, 'Unemployment', country, year) ?? 0,
-      literacy_rate: getIndicatorValue(allIndicators, 'Literacy', country, year) ?? 0,
-      life_expectancy: getIndicatorValue(allIndicators, 'Health', country, year) ?? 0,
-      poverty_rate: getIndicatorValue(allIndicators, 'Poverty', country, year) ?? 0,
-      co2_emissions: getIndicatorValue(allIndicators, 'CO2_Emissions', country, year) ?? 0,
-      population: getIndicatorValue(allIndicators, 'Population', country, year) ?? 0,
-      infant_mortality: getIndicatorValue(allIndicators, 'MortalityRate', country, year) ?? 0,
-      health_expenditure: getIndicatorValue(allIndicators, 'Health', country, year) ?? 0,
-      education_spending: getIndicatorValue(allIndicators, 'Education', country, year) ?? 0,
-      infrastructure_investment: getIndicatorValue(allIndicators, 'Infrastructure', country, year) ?? 0
+      gdp_growth: gdpValue,
+      unemployment: unemploymentValue,
+      literacy_rate: literacyValue,
+      life_expectancy: healthValue,
+      poverty_rate: povertyValue,
+      co2_emissions: co2Value,
+      population: populationValue,
+      infant_mortality: mortalityValue,
+      health_expenditure: healthValue * 0.8, // Derive from health indicator
+      education_spending: educationValue,
+      infrastructure_investment: infrastructureValue
     };
   };
 
@@ -209,7 +236,7 @@ function App() {
       gameState.playerCountry,
       playerDecisionsObj,
       gameState.regionalMatrix.tradeMatrix,
-      {} // No realTradeData available, pass empty object
+      BILATERAL_TRADE_PRODUCTS // Use bilateral trade products data
     );
 
     // Update all countries
@@ -305,15 +332,47 @@ function App() {
     const events: RegionalEvent[] = [];
     const eventProbability = Math.random();
     
-    if (eventProbability < 0.1) {
-      // TODO: Replace with Excel-based event loader or remove if not needed
-      // Provide a dummy event for now
+    if (eventProbability < 0.15) {
+      // SAARC Summit
       events.push({
-        id: 'random',
-        name: 'Random Event',
-        description: 'A random event occurred.',
+        id: 'saarc_summit',
+        name: 'SAARC Summit',
+        description: 'Regional leaders meet to discuss trade and cooperation.',
         year: gameState.year + 1,
-        effects: {}
+        effects: {
+          gdp_growth: 0.2,
+          cooperation: 5
+        }
+      });
+    }
+    
+    if (eventProbability < 0.08) {
+      // Natural disaster
+      events.push({
+        id: 'natural_disaster',
+        name: 'Regional Natural Disaster',
+        description: 'Floods or earthquakes affect multiple countries.',
+        year: gameState.year + 1,
+        effects: {
+          gdp_growth: -0.5,
+          infrastructure_investment: -1.0,
+          poverty_rate: 2.0
+        }
+      });
+    }
+    
+    if (eventProbability < 0.12) {
+      // Trade agreement
+      events.push({
+        id: 'trade_agreement',
+        name: 'Regional Trade Agreement',
+        description: 'New bilateral trade agreement signed between countries.',
+        year: gameState.year + 1,
+        effects: {
+          gdp_growth: 0.3,
+          trade_volume: 10,
+          cooperation: 3
+        }
       });
     }
     
@@ -324,8 +383,8 @@ function App() {
     if (!gameState.playerCountry) return;
     
     const finalStats = gameState.countries[gameState.playerCountry];
-  // Use ExcelDataLoader to get initialStats for the selected country
-  const initialStats = buildInitialStats(gameState.playerCountry, startYear);
+    // Use ExcelDataLoader to get initialStats for the selected country
+    const initialStats = buildInitialStats(gameState.playerCountry, startYear);
     const score = PolicySimulator.calculateScore(finalStats, initialStats);
     
     setFinalScore(score);

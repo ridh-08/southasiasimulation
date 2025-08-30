@@ -1,0 +1,186 @@
+{
+  "imports": {
+    "India": {
+      "Bangladesh": ["Textiles", "Jute", "Leather goods", "Pharmaceuticals", "Fish", "Tea"],
+      "Pakistan": ["Cotton", "Cement", "Sports goods", "Surgical instruments", "Rice", "Fruits"],
+      "Sri Lanka": ["Tea", "Rubber", "Coconut products", "Gems", "Spices", "Garments"],
+      "Nepal": ["Handicrafts", "Carpets", "Pashmina", "Herbs", "Hydroelectric power", "Agricultural products"],
+      "Bhutan": ["Hydroelectric power", "Cement", "Timber", "Agricultural products", "Handicrafts"],
+      "Maldives": ["Fish", "Tourism services", "Coconut products"],
+      "Afghanistan": ["Dried fruits", "Nuts", "Carpets", "Precious stones", "Medicinal plants"],
+      "Myanmar": ["Pulses", "Rice", "Timber", "Gems", "Natural gas", "Agricultural products"]
+    },
+    "Bangladesh": {
+      "India": ["Petroleum products", "Cotton", "Machinery", "Iron and steel", "Chemicals", "Vehicles"],
+      "Pakistan": ["Cotton", "Wheat", "Cement", "Chemicals"],
+      "Sri Lanka": ["Coconut oil", "Spices", "Tea"],
+      "Nepal": ["Jute products", "Textiles"],
+      "Bhutan": ["Textiles", "Processed foods"],
+      "Maldives": ["Textiles", "Processed foods"],
+      "Afghanistan": ["Textiles", "Pharmaceuticals"],
+      "Myanmar": ["Textiles", "Pharmaceuticals", "Chemicals"]
+    },
+    "Pakistan": {
+      "India": ["Cotton textiles", "Chemicals", "Leather", "Sports goods", "Surgical instruments"],
+      "Bangladesh": ["Cotton", "Wheat", "Cement", "Chemicals"],
+      "Sri Lanka": ["Cotton textiles", "Rice", "Cement"],
+      "Nepal": ["Textiles", "Rice"],
+      "Bhutan": ["Textiles", "Rice"],
+      "Maldives": ["Textiles", "Rice"],
+      "Afghanistan": ["Wheat", "Cement", "Textiles", "Pharmaceuticals"],
+      "Myanmar": ["Cotton textiles", "Chemicals"]
+    },
+    "Sri Lanka": {
+      "India": ["Petroleum products", "Textiles", "Pharmaceuticals", "Vehicles", "Machinery"],
+      "Bangladesh": ["Textiles", "Pharmaceuticals"],
+      "Pakistan": ["Cotton textiles", "Rice", "Cement"],
+      "Nepal": ["Tea", "Spices"],
+      "Bhutan": ["Tea", "Processed foods"],
+      "Maldives": ["Tea", "Textiles", "Processed foods"],
+      "Afghanistan": ["Tea", "Textiles"],
+      "Myanmar": ["Tea", "Textiles", "Processed foods"]
+    },
+    "Nepal": {
+      "India": ["Petroleum products", "Machinery", "Iron and steel", "Vehicles", "Pharmaceuticals"],
+      "Bangladesh": ["Jute products", "Textiles"],
+      "Pakistan": ["Textiles", "Rice"],
+      "Sri Lanka": ["Tea", "Spices"],
+      "Bhutan": ["Hydroelectric equipment"],
+      "Maldives": ["Handicrafts"],
+      "Afghanistan": ["Textiles"],
+      "Myanmar": ["Textiles"]
+    },
+    "Bhutan": {
+      "India": ["Petroleum products", "Machinery", "Vehicles", "Iron and steel", "Textiles"],
+      "Bangladesh": ["Textiles", "Processed foods"],
+      "Pakistan": ["Textiles", "Rice"],
+      "Sri Lanka": ["Tea", "Processed foods"],
+      "Nepal": ["Hydroelectric equipment"],
+      "Maldives": ["Textiles"],
+      "Afghanistan": ["Textiles"],
+      "Myanmar": ["Textiles"]
+    },
+    "Maldives": {
+      "India": ["Petroleum products", "Textiles", "Machinery", "Food products", "Construction materials"],
+      "Bangladesh": ["Textiles", "Processed foods"],
+      "Pakistan": ["Textiles", "Rice"],
+      "Sri Lanka": ["Tea", "Textiles", "Processed foods"],
+      "Nepal": ["Handicrafts"],
+      "Bhutan": ["Textiles"],
+      "Afghanistan": ["Textiles"],
+      "Myanmar": ["Textiles"]
+    },
+    "Afghanistan": {
+      "India": ["Pharmaceuticals", "Tea", "Textiles", "Machinery", "Vehicles"],
+      "Bangladesh": ["Textiles", "Pharmaceuticals"],
+      "Pakistan": ["Wheat", "Cement", "Textiles", "Pharmaceuticals", "Petroleum products"],
+      "Sri Lanka": ["Tea", "Textiles"],
+      "Nepal": ["Textiles"],
+      "Bhutan": ["Textiles"],
+      "Maldives": ["Textiles"],
+      "Myanmar": ["Textiles"]
+    },
+    "Myanmar": {
+      "India": ["Petroleum products", "Machinery", "Iron and steel", "Pharmaceuticals", "Vehicles"],
+      "Bangladesh": ["Textiles", "Pharmaceuticals", "Chemicals"],
+      "Pakistan": ["Cotton textiles", "Chemicals"],
+      "Sri Lanka": ["Tea", "Textiles", "Processed foods"],
+      "Nepal": ["Textiles"],
+      "Bhutan": ["Textiles"],
+      "Maldives": ["Textiles"],
+      "Afghanistan": ["Textiles"]
+    }
+  },
+  "exports": {
+    "India": {
+      "Bangladesh": ["Petroleum products", "Cotton", "Machinery", "Iron and steel", "Chemicals", "Vehicles"],
+      "Pakistan": ["Cotton textiles", "Chemicals", "Leather", "Sports goods", "Surgical instruments"],
+      "Sri Lanka": ["Petroleum products", "Textiles", "Pharmaceuticals", "Vehicles", "Machinery"],
+      "Nepal": ["Petroleum products", "Machinery", "Iron and steel", "Vehicles", "Pharmaceuticals"],
+      "Bhutan": ["Petroleum products", "Machinery", "Vehicles", "Iron and steel", "Textiles"],
+      "Maldives": ["Petroleum products", "Textiles", "Machinery", "Food products", "Construction materials"],
+      "Afghanistan": ["Pharmaceuticals", "Tea", "Textiles", "Machinery", "Vehicles"],
+      "Myanmar": ["Petroleum products", "Machinery", "Iron and steel", "Pharmaceuticals", "Vehicles"]
+    },
+    "Bangladesh": {
+      "India": ["Textiles", "Jute", "Leather goods", "Pharmaceuticals", "Fish", "Tea"],
+      "Pakistan": ["Cotton", "Wheat", "Cement", "Chemicals"],
+      "Sri Lanka": ["Textiles", "Pharmaceuticals"],
+      "Nepal": ["Jute products", "Textiles"],
+      "Bhutan": ["Textiles", "Processed foods"],
+      "Maldives": ["Textiles", "Processed foods"],
+      "Afghanistan": ["Textiles", "Pharmaceuticals"],
+      "Myanmar": ["Textiles", "Pharmaceuticals", "Chemicals"]
+    },
+    "Pakistan": {
+      "India": ["Cotton", "Cement", "Sports goods", "Surgical instruments", "Rice", "Fruits"],
+      "Bangladesh": ["Cotton", "Wheat", "Cement", "Chemicals"],
+      "Sri Lanka": ["Cotton textiles", "Rice", "Cement"],
+      "Nepal": ["Textiles", "Rice"],
+      "Bhutan": ["Textiles", "Rice"],
+      "Maldives": ["Textiles", "Rice"],
+      "Afghanistan": ["Wheat", "Cement", "Textiles", "Pharmaceuticals"],
+      "Myanmar": ["Cotton textiles", "Chemicals"]
+    },
+    "Sri Lanka": {
+      "India": ["Tea", "Rubber", "Coconut products", "Gems", "Spices", "Garments"],
+      "Bangladesh": ["Coconut oil", "Spices", "Tea"],
+      "Pakistan": ["Cotton textiles", "Rice", "Cement"],
+      "Nepal": ["Tea", "Spices"],
+      "Bhutan": ["Tea", "Processed foods"],
+      "Maldives": ["Tea", "Textiles", "Processed foods"],
+      "Afghanistan": ["Tea", "Textiles"],
+      "Myanmar": ["Tea", "Textiles", "Processed foods"]
+    },
+    "Nepal": {
+      "India": ["Handicrafts", "Carpets", "Pashmina", "Herbs", "Hydroelectric power", "Agricultural products"],
+      "Bangladesh": ["Jute products", "Textiles"],
+      "Pakistan": ["Textiles", "Rice"],
+      "Sri Lanka": ["Tea", "Spices"],
+      "Bhutan": ["Hydroelectric equipment"],
+      "Maldives": ["Handicrafts"],
+      "Afghanistan": ["Textiles"],
+      "Myanmar": ["Textiles"]
+    },
+    "Bhutan": {
+      "India": ["Hydroelectric power", "Cement", "Timber", "Agricultural products", "Handicrafts"],
+      "Bangladesh": ["Textiles", "Processed foods"],
+      "Pakistan": ["Textiles", "Rice"],
+      "Sri Lanka": ["Tea", "Processed foods"],
+      "Nepal": ["Hydroelectric equipment"],
+      "Maldives": ["Textiles"],
+      "Afghanistan": ["Textiles"],
+      "Myanmar": ["Textiles"]
+    },
+    "Maldives": {
+      "India": ["Fish", "Tourism services", "Coconut products"],
+      "Bangladesh": ["Textiles", "Processed foods"],
+      "Pakistan": ["Textiles", "Rice"],
+      "Sri Lanka": ["Tea", "Textiles", "Processed foods"],
+      "Nepal": ["Handicrafts"],
+      "Bhutan": ["Textiles"],
+      "Afghanistan": ["Textiles"],
+      "Myanmar": ["Textiles"]
+    },
+    "Afghanistan": {
+      "India": ["Dried fruits", "Nuts", "Carpets", "Precious stones", "Medicinal plants"],
+      "Bangladesh": ["Textiles", "Pharmaceuticals"],
+      "Pakistan": ["Wheat", "Cement", "Textiles", "Pharmaceuticals", "Petroleum products"],
+      "Sri Lanka": ["Tea", "Textiles"],
+      "Nepal": ["Textiles"],
+      "Bhutan": ["Textiles"],
+      "Maldives": ["Textiles"],
+      "Myanmar": ["Textiles"]
+    },
+    "Myanmar": {
+      "India": ["Pulses", "Rice", "Timber", "Gems", "Natural gas", "Agricultural products"],
+      "Bangladesh": ["Textiles", "Pharmaceuticals", "Chemicals"],
+      "Pakistan": ["Cotton textiles", "Chemicals"],
+      "Sri Lanka": ["Tea", "Textiles", "Processed foods"],
+      "Nepal": ["Textiles"],
+      "Bhutan": ["Textiles"],
+      "Maldives": ["Textiles"],
+      "Afghanistan": ["Textiles"]
+    }
+  }
+}
